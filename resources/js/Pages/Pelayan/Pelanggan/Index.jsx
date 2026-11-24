@@ -1,6 +1,7 @@
 import PelayanLayout from "@/Layouts/PelayanLayout";
-import { Link, router } from "@inertiajs/react";
+import { Link, router, useForm } from "@inertiajs/react";
 import { useState } from "react";
+import Modal from "@/Components/Modal";
 import {
     MagnifyingGlassIcon,
     UserPlusIcon,
@@ -11,6 +12,21 @@ import {
 
 export default function PelangganIndex({ pelanggans }) {
     const [searchTerm, setSearchTerm] = useState("");
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        reset,
+        clearErrors,
+    } = useForm({
+        nama: "",
+        no_telepon: "",
+        nik: "",
+        alamat: "",
+    });
 
     const search = (e) => {
         e.preventDefault();
@@ -22,6 +38,24 @@ export default function PelangganIndex({ pelanggans }) {
                 preserveScroll: true,
             },
         );
+    };
+
+    const closeCreateModal = () => {
+        if (processing) return;
+        setShowCreateModal(false);
+        reset();
+        clearErrors();
+    };
+
+    const submitCreateForm = (e) => {
+        e.preventDefault();
+        post("/pelayan/pelanggan", {
+            onSuccess: () => {
+                setShowCreateModal(false);
+                reset();
+                clearErrors();
+            },
+        });
     };
 
     return (
@@ -37,13 +71,14 @@ export default function PelangganIndex({ pelanggans }) {
                             Daftar pelanggan yang pernah melakukan transaksi
                         </p>
                     </div>
-                    <Link
-                        href="/pelayan/pelanggan/create"
+                    <button
+                        type="button"
+                        onClick={() => setShowCreateModal(true)}
                         className="px-4 py-2 bg-[#C5A059] text-[#0A192F] rounded-lg font-medium hover:bg-[#D4AF37] transition-colors flex items-center"
                     >
                         <UserPlusIcon className="w-5 h-5 mr-2" />
                         Tambah Pelanggan
-                    </Link>
+                    </button>
                 </div>
 
                 {/* Search */}
@@ -173,6 +208,135 @@ export default function PelangganIndex({ pelanggans }) {
                     )}
                 </div>
             </div>
+
+            <Modal
+                show={showCreateModal}
+                onClose={closeCreateModal}
+                closeable={!processing}
+                maxWidth="lg"
+            >
+                <form onSubmit={submitCreateForm} className="p-6">
+                    <h3 className="mb-5 text-lg font-semibold text-gray-900">
+                        Tambah Pelanggan
+                    </h3>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label
+                                htmlFor="nama"
+                                className="mb-1 block text-sm font-medium text-gray-700"
+                            >
+                                Nama <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="nama"
+                                type="text"
+                                value={data.nama}
+                                onChange={(e) =>
+                                    setData("nama", e.target.value)
+                                }
+                                maxLength={100}
+                                required
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                            />
+                            {errors.nama && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.nama}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="no_telepon"
+                                className="mb-1 block text-sm font-medium text-gray-700"
+                            >
+                                No. Telepon
+                            </label>
+                            <input
+                                id="no_telepon"
+                                type="tel"
+                                value={data.no_telepon}
+                                onChange={(e) =>
+                                    setData("no_telepon", e.target.value)
+                                }
+                                maxLength={15}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                            />
+                            {errors.no_telepon && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.no_telepon}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="nik"
+                                className="mb-1 block text-sm font-medium text-gray-700"
+                            >
+                                NIK
+                            </label>
+                            <input
+                                id="nik"
+                                type="text"
+                                value={data.nik}
+                                onChange={(e) =>
+                                    setData("nik", e.target.value)
+                                }
+                                maxLength={20}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                            />
+                            {errors.nik && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.nik}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="alamat"
+                                className="mb-1 block text-sm font-medium text-gray-700"
+                            >
+                                Alamat
+                            </label>
+                            <textarea
+                                id="alamat"
+                                value={data.alamat}
+                                onChange={(e) =>
+                                    setData("alamat", e.target.value)
+                                }
+                                rows={3}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                            />
+                            {errors.alamat && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.alamat}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={closeCreateModal}
+                            disabled={processing}
+                            className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="rounded-lg bg-[#0A192F] px-4 py-2 text-white transition-colors hover:bg-[#1E2F4A] disabled:opacity-50"
+                        >
+                            {processing ? "Menyimpan..." : "Simpan Pelanggan"}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </PelayanLayout>
     );
 }
