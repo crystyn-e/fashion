@@ -1,5 +1,6 @@
 import { Link, useForm } from "@inertiajs/react";
 import { useEffect } from "react";
+import { LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -20,137 +21,154 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full">
-                {/* Main Card */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                    {/* Logo Section */}
-                    <div className="px-8 pt-8 pb-6 text-center">
-                        <div className="flex justify-center mb-4">
+        <div className="flex min-h-screen items-center justify-center bg-[#F7F8FA] px-4 py-10 sm:px-6">
+            <div className="w-full max-w-[420px]">
+                <main className="rounded-2xl border border-gray-200 bg-white px-6 py-8 shadow-sm sm:px-10 sm:py-10">
+                    <div className="mb-8 text-center">
+                        <Link
+                            href="/"
+                            className="mb-6 inline-flex items-center gap-3"
+                        >
                             <img
                                 src="/images/logo-boesafashion.jpg"
                                 alt="Logo Boesa Fashion"
-                                className="w-20 h-20 object-contain rounded-xl"
+                                className="h-12 w-12 rounded-lg object-cover"
                             />
-                        </div>
-                        {/* <h2 className="text-2xl font-light text-gray-800">
-                            BOESA FASHION
-                        </h2> */}
-                        <p className="mt-2 text-sm text-gray-400">
-                            Silakan login untuk mengakses dashboard
+                            <span className="text-left text-sm font-semibold uppercase tracking-[0.16em] text-[#0A192F]">
+                                Boesa
+                                <span className="block text-xs font-medium tracking-[0.28em] text-[#A98039]">
+                                    Fashion
+                                </span>
+                            </span>
+                        </Link>
+                        <h1 className="text-2xl font-semibold tracking-tight text-[#0A192F]">
+                            Masuk ke akun
+                        </h1>
+                        <p className="mt-2 text-sm text-gray-500">
+                            Silakan login untuk mengakses dashboard.
                         </p>
                     </div>
 
-                    {/* Status Message */}
                     {status && (
-                        <div className="mx-8 mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                        <div
+                            role="status"
+                            className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+                        >
                             {status}
                         </div>
                     )}
 
-                    {/* Login Form */}
-                    <form className="px-8 pb-8 space-y-6" onSubmit={submit}>
-                        <div className="space-y-4">
-                            {/* Username Field */}
-                            <div>
-                                <label
-                                    htmlFor="username"
-                                    className="block text-sm font-medium text-gray-700 mb-1"
-                                >
-                                    Username
-                                </label>
+                    <form className="space-y-5" onSubmit={submit}>
+                        <div>
+                            <label
+                                htmlFor="username"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
+                                Username
+                            </label>
+                            <div className="relative">
+                                <UserIcon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                                 <input
                                     id="username"
                                     type="text"
                                     name="username"
                                     value={data.username}
-                                    className="appearance-none relative block w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all duration-300"
+                                    aria-invalid={Boolean(errors.username)}
+                                    aria-describedby={
+                                        errors.username
+                                            ? "username-error"
+                                            : undefined
+                                    }
+                                    className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-11 pr-4 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20"
                                     placeholder="Masukkan username"
                                     autoComplete="username"
                                     onChange={(e) =>
                                         setData("username", e.target.value)
                                     }
                                 />
-                                {errors.username && (
-                                    <p className="mt-1 text-sm text-red-600">
-                                        {errors.username}
-                                    </p>
-                                )}
                             </div>
-
-                            {/* Password Field */}
-                            <div>
-                                <label
-                                    htmlFor="password"
-                                    className="block text-sm font-medium text-gray-700 mb-1"
+                            {errors.username && (
+                                <p
+                                    id="username-error"
+                                    className="mt-2 text-sm text-red-600"
                                 >
-                                    Password
-                                </label>
+                                    {errors.username}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="password"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
+                                Password
+                            </label>
+                            <div className="relative">
+                                <LockClosedIcon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                                 <input
                                     id="password"
                                     type="password"
                                     name="password"
                                     value={data.password}
-                                    className="appearance-none relative block w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all duration-300"
+                                    aria-invalid={Boolean(errors.password)}
+                                    aria-describedby={
+                                        errors.password
+                                            ? "password-error"
+                                            : undefined
+                                    }
+                                    className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-11 pr-4 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20"
                                     placeholder="Masukkan password"
                                     autoComplete="current-password"
                                     onChange={(e) =>
                                         setData("password", e.target.value)
                                     }
                                 />
-                                {errors.password && (
-                                    <p className="mt-1 text-sm text-red-600">
-                                        {errors.password}
-                                    </p>
-                                )}
                             </div>
-                        </div>
-
-                        {/* Remember Me */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember"
-                                    name="remember"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-[#C5A059] focus:ring-[#C5A059] border-gray-300 rounded"
-                                    checked={data.remember}
-                                    onChange={(e) =>
-                                        setData("remember", e.target.checked)
-                                    }
-                                />
-                                <label
-                                    htmlFor="remember"
-                                    className="ml-2 block text-sm text-gray-600"
+                            {errors.password && (
+                                <p
+                                    id="password-error"
+                                    className="mt-2 text-sm text-red-600"
                                 >
-                                    Ingat saya
-                                </label>
-                            </div>
+                                    {errors.password}
+                                </p>
+                            )}
                         </div>
 
-                        {/* Submit Button */}
+                        <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+                            <input
+                                id="remember"
+                                name="remember"
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-gray-300 accent-[#C5A059] focus:ring-[#C5A059]"
+                                checked={data.remember}
+                                onChange={(e) =>
+                                    setData("remember", e.target.checked)
+                                }
+                            />
+                            Ingat saya
+                        </label>
+
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-[#0A192F] hover:bg-[#1E2F4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C5A059] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full rounded-lg bg-[#0A192F] px-4 py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-[#172B49] focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {processing ? "Memproses..." : "MASUK"}
                         </button>
                     </form>
 
-                    {/* Back to Home Link */}
-                    <div className="px-8 pb-8 text-center border-t border-gray-100 pt-6">
+                    <div className="mt-7 border-t border-gray-100 pt-5 text-center">
                         <Link
                             href="/"
-                            className="text-sm text-gray-400 hover:text-[#C5A059] transition-colors"
+                            className="text-sm text-gray-500 transition hover:text-[#A98039]"
                         >
                             ← Kembali ke Beranda
                         </Link>
                     </div>
-                </div>
+                </main>
 
-                {/* Footer */}
-                <p className="text-center text-xs text-gray-400 mt-6">
+                <p className="mt-6 text-center text-xs text-gray-400">
                     © {new Date().getFullYear()} Boesa Fashion. All rights
                     reserved.
                 </p>
