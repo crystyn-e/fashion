@@ -72,7 +72,7 @@ export default function PublicLayout({ children }) {
                         </div>
 
                         {/* Tombol Masuk */}
-                        <div className="hidden md:flex items-center space-x-3">
+                        {/* <div className="hidden md:flex items-center space-x-3">
                             <Link
                                 href="/login"
                                 className="px-6 py-2.5 bg-gradient-to-r from-[#C5A059] to-[#D4AF37] text-[#0A192F] rounded-lg font-medium text-sm shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300"
@@ -82,7 +82,7 @@ export default function PublicLayout({ children }) {
                                     <span>MASUK</span>
                                 </span>
                             </Link>
-                        </div>
+                        </div> */}
 
                         {/* Mobile Menu Button */}
                         <button
