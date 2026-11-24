@@ -27,15 +27,15 @@ export default function Login({ status, canResetPassword }) {
                     {/* Logo Section */}
                     <div className="px-8 pt-8 pb-6 text-center">
                         <div className="flex justify-center mb-4">
-                            <div className="w-20 h-20 bg-[#0A192F] rounded-2xl flex items-center justify-center shadow-md">
-                                <span className="text-[#C5A059] font-black text-3xl">
-                                    BF
-                                </span>
-                            </div>
+                            <img
+                                src="/images/logo-boesafashion.jpg"
+                                alt="Logo Boesa Fashion"
+                                className="w-20 h-20 object-contain rounded-xl"
+                            />
                         </div>
-                        <h2 className="text-2xl font-light text-gray-800">
+                        {/* <h2 className="text-2xl font-light text-gray-800">
                             BOESA FASHION
-                        </h2>
+                        </h2> */}
                         <p className="mt-2 text-sm text-gray-400">
                             Silakan login untuk mengakses dashboard
                         </p>
