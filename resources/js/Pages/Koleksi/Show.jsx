@@ -62,6 +62,9 @@ export default function KoleksiShow({ barang, barangTerkait }) {
                                 }
                                 alt={barang.nama_barang}
                                 className="w-full h-96 object-cover"
+                                style={{
+                                    objectPosition: `${barang.gambar_position_x ?? 50}% ${barang.gambar_position_y ?? 50}%`,
+                                }}
                                 onError={(e) => {
                                     e.target.src =
                                         "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=800&fit=crop";
@@ -156,6 +159,9 @@ export default function KoleksiShow({ barang, barangTerkait }) {
                                                 }
                                                 alt={item.nama_barang}
                                                 className="w-full h-48 object-cover"
+                                                style={{
+                                                    objectPosition: `${item.gambar_position_x ?? 50}% ${item.gambar_position_y ?? 50}%`,
+                                                }}
                                             />
                                             {item.status === "disewa" && (
                                                 <span className="absolute top-2 right-2 px-2 py-1 text-xs bg-orange-500 text-white rounded-full">

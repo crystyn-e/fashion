@@ -11,9 +11,9 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Ambil produk terbaru yang tersedia
+        // Ambil produk terbaru yang tersedia atau sedang disewa
         $barangTerbaru = Barang::with('kategori')
-            ->where('status', 'tersedia')
+            ->whereIn('status', ['tersedia', 'disewa'])
             ->latest()
             ->take(8)
             ->get()
@@ -24,6 +24,8 @@ class HomeController extends Controller
                     'slug' => $barang->slug,
                     'harga_sewa' => $barang->harga_sewa,
                     'gambar_utama' => $barang->gambar_utama,  // <-- INI YANG BENAR
+                    'gambar_position_x' => $barang->gambar_position_x,
+                    'gambar_position_y' => $barang->gambar_position_y,
                     'status' => $barang->status,
                     'badge' => $barang->badge ?? null,
                     'kategori' => $barang->kategori ? [

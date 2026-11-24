@@ -126,6 +126,9 @@ export default function KoleksiIndex({
                                             }
                                             alt={barang.nama_barang}
                                             className="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-110"
+                                            style={{
+                                                objectPosition: `${barang.gambar_position_x ?? 50}% ${barang.gambar_position_y ?? 50}%`,
+                                            }}
                                         />
                                         {/* Subtle Vignette */}
                                         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 opacity-60"></div>

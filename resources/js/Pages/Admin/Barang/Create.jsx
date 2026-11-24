@@ -2,6 +2,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link } from "@inertiajs/react";
 import { ArrowLeftIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import ImagePositionPicker from "./ImagePositionPicker";
 
 export default function BarangCreate({ kategoris }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -15,6 +16,8 @@ export default function BarangCreate({ kategoris }) {
         deskripsi: "",
         status: "tersedia",
         gambar_utama: null,
+        gambar_position_x: 50,
+        gambar_position_y: 50,
     });
 
     const [previewImage, setPreviewImage] = useState(null);
@@ -253,10 +256,10 @@ export default function BarangCreate({ kategoris }) {
                                     <div className="space-y-1 text-center">
                                         {previewImage ? (
                                             <div className="mb-4">
-                                                <img
+                                                <ImagePositionPicker
                                                     src={previewImage}
-                                                    alt="Preview"
-                                                    className="mx-auto h-32 w-32 object-cover rounded-xl shadow-md"
+                                                    positionX={data.gambar_position_x}
+                                                    positionY={data.gambar_position_y}
                                                 />
                                             </div>
                                         ) : (

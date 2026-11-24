@@ -43,6 +43,8 @@ class KoleksiController extends Controller
                 'warna' => $barang->warna,
                 'deskripsi' => $barang->deskripsi,
                 'gambar' => $barang->gambar_utama ? '/storage/' . $barang->gambar_utama : null,
+                'gambar_position_x' => $barang->gambar_position_x,
+                'gambar_position_y' => $barang->gambar_position_y,
                 'status' => $barang->status, // TERSEDIA / DISEWA / MAINTENANCE
                 'badge' => $barang->created_at->gt(now()->subDays(7)) ? 'NEW' : null,
             ];
@@ -83,6 +85,8 @@ class KoleksiController extends Controller
                     'slug' => $item->slug,
                     'harga_sewa' => $item->harga_sewa,
                     'gambar' => $item->gambar_utama ? '/storage/' . $item->gambar_utama : null,
+                    'gambar_position_x' => $item->gambar_position_x,
+                    'gambar_position_y' => $item->gambar_position_y,
                     'status' => $item->status,
                 ];
             });
@@ -97,6 +101,8 @@ class KoleksiController extends Controller
                 'warna' => $barang->warna,
                 'deskripsi' => $barang->deskripsi,
                 'gambar' => $barang->gambar_utama ? '/storage/' . $barang->gambar_utama : null,
+                'gambar_position_x' => $barang->gambar_position_x,
+                'gambar_position_y' => $barang->gambar_position_y,
                 'status' => $barang->status,
             ],
             'barangTerkait' => $barangTerkait

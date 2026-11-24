@@ -74,6 +74,8 @@ class BarangController extends Controller
             'deskripsi' => 'nullable|string',
             'status' => 'required|in:tersedia,disewa,maintenance',
             'gambar_utama' => 'nullable|image|max:2048',
+            'gambar_position_x' => 'required|integer|min:0|max:100',
+            'gambar_position_y' => 'required|integer|min:0|max:100',
         ]);
 
         $data = $request->except('gambar_utama');
@@ -121,6 +123,8 @@ class BarangController extends Controller
                 'deskripsi' => $barang->deskripsi,
                 'status' => $barang->status,
                 'gambar_utama' => $barang->gambar_utama,
+                'gambar_position_x' => $barang->gambar_position_x,
+                'gambar_position_y' => $barang->gambar_position_y,
             ]
         ]);
     }
@@ -162,6 +166,8 @@ class BarangController extends Controller
             'stok' => 'required|integer|min:0',
             'deskripsi' => 'nullable|string',
             'status' => 'required|in:tersedia,disewa,maintenance',
+            'gambar_position_x' => 'required|integer|min:0|max:100',
+            'gambar_position_y' => 'required|integer|min:0|max:100',
         ]);
 
         $data = $request->except('gambar_utama');

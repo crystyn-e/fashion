@@ -2,6 +2,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link } from "@inertiajs/react";
 import { ArrowLeftIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import ImagePositionPicker from "./ImagePositionPicker";
 
 export default function BarangEdit({ barang, kategoris }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -15,6 +16,8 @@ export default function BarangEdit({ barang, kategoris }) {
         deskripsi: barang.deskripsi || "",
         status: barang.status,
         gambar_utama: null,
+        gambar_position_x: barang.gambar_position_x ?? 50,
+        gambar_position_y: barang.gambar_position_y ?? 50,
     });
 
     const [previewImage, setPreviewImage] = useState(
@@ -256,10 +259,10 @@ export default function BarangEdit({ barang, kategoris }) {
                                     <div className="space-y-1 text-center">
                                         {previewImage ? (
                                             <div className="mb-4">
-                                                <img
+                                                <ImagePositionPicker
                                                     src={previewImage}
-                                                    alt="Preview"
-                                                    className="mx-auto h-32 w-32 object-cover rounded-xl shadow-md"
+                                                    positionX={data.gambar_position_x}
+                                                    positionY={data.gambar_position_y}
                                                 />
                                             </div>
                                         ) : (

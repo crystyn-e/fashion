@@ -21,6 +21,8 @@ class Barang extends Model
         'stok',
         'deskripsi',
         'gambar_utama',
+        'gambar_position_x',
+        'gambar_position_y',
         'gambar_lain',
         'status',
         'total_disewa'
@@ -30,6 +32,8 @@ class Barang extends Model
         'harga_sewa' => 'decimal:2',
         'stok' => 'integer',
         'total_disewa' => 'integer',
+        'gambar_position_x' => 'integer',
+        'gambar_position_y' => 'integer',
         'gambar_lain' => 'array'
     ];
 

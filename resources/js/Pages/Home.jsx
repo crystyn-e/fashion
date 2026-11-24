@@ -84,7 +84,7 @@ export default function Home({
     };
 
     const hasProducts = initialProducts && initialProducts.length > 0;
-    const heroProducts = hasProducts ? initialProducts.slice(0, 4) : [];
+    const heroProducts = hasProducts ? initialProducts.slice(0, 3) : [];
     const featuredList = hasProducts ? initialProducts.slice(0, 6) : [];
 
     const categoryList =
@@ -154,18 +154,6 @@ export default function Home({
                     <div className="text-center">
                         <div className="w-16 h-16 border-4 border-[#C5A059] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                         <p className="text-gray-600">Memuat koleksi...</p>
-                    </div>
-                </div>
-            </PublicLayout>
-        );
-    }
-
-    if (!hasProducts) {
-        return (
-            <PublicLayout>
-                <div className="min-h-screen flex items-center justify-center">
-                    <div className="text-center">
-                        <p className="text-gray-600">Belum ada koleksi</p>
                     </div>
                 </div>
             </PublicLayout>
@@ -285,18 +273,27 @@ export default function Home({
                             </div>
 
                             <div className="relative">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid h-[440px] grid-cols-2 grid-rows-2 gap-4 sm:h-[520px] lg:h-[560px]">
                                     {heroProducts.map((product, index) => (
                                         <div
                                             key={product.id}
-                                            className={`group relative bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden transform hover:-translate-y-2 transition-all duration-500 ${index === 0 ? "row-span-2" : ""}`}
+                                            className={`group relative bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden transform hover:-translate-y-2 transition-all duration-500 ${index === 0 ? (heroProducts.length === 1 ? "col-span-2 row-span-2" : "row-span-2") : heroProducts.length === 2 ? "row-span-2" : ""}`}
                                         >
-                                            <div className="relative aspect-[3/4] overflow-hidden">
+                                            <div className="relative h-full overflow-hidden">
                                                 <img
                                                     src={getImageUrl(product)}
                                                     alt={product.nama_barang}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    style={{
+                                                        objectPosition: `${product.gambar_position_x ?? 50}% ${product.gambar_position_y ?? 50}%`,
+                                                    }}
                                                 />
+                                                {product.status ===
+                                                    "disewa" && (
+                                                    <span className="absolute top-4 left-4 z-10 px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-lg">
+                                                        Disewa
+                                                    </span>
+                                                )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-transparent to-transparent opacity-60"></div>
                                                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                                                     <p className="font-semibold text-sm">
@@ -392,6 +389,9 @@ export default function Home({
                                             src={getImageUrl(product)}
                                             alt={product.nama_barang}
                                             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
+                                            style={{
+                                                objectPosition: `${product.gambar_position_x ?? 50}% ${product.gambar_position_y ?? 50}%`,
+                                            }}
                                         />
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
                                             <Link
@@ -406,6 +406,13 @@ export default function Home({
                                             <div className="absolute top-6 right-6">
                                                 <span className="px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest shadow-lg bg-[#C5A059] text-[#0A192F]">
                                                     {product.badge}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {product.status === "disewa" && (
+                                            <div className="absolute top-6 left-6">
+                                                <span className="px-3 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full shadow-lg">
+                                                    Disewa
                                                 </span>
                                             </div>
                                         )}
