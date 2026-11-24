@@ -1,6 +1,7 @@
 import PelayanLayout from "@/Layouts/PelayanLayout";
 import { useForm, Link } from "@inertiajs/react";
 import { useState } from "react";
+import Modal from "@/Components/Modal";
 import {
     ArrowLeftIcon,
     ShoppingCartIcon,
@@ -8,12 +9,14 @@ import {
     PlusIcon,
     MagnifyingGlassIcon,
     CalendarIcon,
+    XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 export default function TransaksiCreate({ barangs }) {
     const [selectedBarang, setSelectedBarang] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [dpManual, setDpManual] = useState("");
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
 
     // Hitung tanggal kembali otomatis (tanggal_pengambilan + 3 hari)
     const hitungTanggalKembali = (tanggal) => {
@@ -48,7 +51,7 @@ export default function TransaksiCreate({ barangs }) {
 
     // Hitung total harga
     const totalHarga = selectedBarang.reduce(
-        (sum, item) => sum + item.harga_sewa,
+        (sum, item) => sum + Number(item.harga_sewa),
         0,
     );
 
@@ -93,18 +96,26 @@ export default function TransaksiCreate({ barangs }) {
     return (
         <PelayanLayout title="Transaksi Baru">
             <div className="py-6">
-                {/* Back Button */}
-                <Link
-                    href="/pelayan/dashboard"
-                    className="inline-flex items-center text-sm text-gray-600 hover:text-[#C5A059] mb-6"
-                >
-                    <ArrowLeftIcon className="w-4 h-4 mr-1" />
-                    Kembali ke Dashboard
-                </Link>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <Link
+                        href="/pelayan/dashboard"
+                        className="inline-flex items-center text-sm text-gray-600 hover:text-[#C5A059]"
+                    >
+                        <ArrowLeftIcon className="w-4 h-4 mr-1" />
+                        Kembali ke Dashboard
+                    </Link>
+                    <button
+                        type="button"
+                        onClick={() => setIsTransactionModalOpen(true)}
+                        className="rounded-lg bg-[#0A192F] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1E2F4A]"
+                    >
+                        Data Transaksi ({selectedBarang.length})
+                    </button>
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - Pilih Barang */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-3">
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4">
                                 Pilih Barang
@@ -129,8 +140,7 @@ export default function TransaksiCreate({ barangs }) {
                                 {filteredBarangs.map((barang) => (
                                     <div
                                         key={barang.id}
-                                        onClick={() => tambahBarang(barang)}
-                                        className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-[#C5A059] hover:bg-gray-50 cursor-pointer transition-all"
+                                        className="flex items-center p-3 border border-gray-200 rounded-lg"
                                     >
                                         <img
                                             src={
@@ -154,19 +164,48 @@ export default function TransaksiCreate({ barangs }) {
                                                 )}
                                             </p>
                                         </div>
-                                        <PlusIcon className="w-5 h-5 text-gray-400 hover:text-[#C5A059]" />
+                                        <button
+                                            type="button"
+                                            onClick={() => tambahBarang(barang)}
+                                            aria-label={`Tambah ${barang.nama_barang} ke data transaksi`}
+                                            className="shrink-0 rounded-full p-2 text-gray-400 transition-colors hover:bg-[#C5A059]/10 hover:text-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]"
+                                        >
+                                            <PlusIcon className="w-5 h-5" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Column - Form Transaksi */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 sticky top-24">
-                            <h2 className="text-xl font-bold text-gray-900 mb-4">
-                                Data Transaksi
-                            </h2>
+                </div>
+
+                <Modal
+                    show={isTransactionModalOpen}
+                    onClose={() => setIsTransactionModalOpen(false)}
+                    maxWidth="2xl"
+                >
+                    <div className="max-h-[85vh] overflow-y-auto p-6">
+                        <div className="mb-5 flex items-start justify-between gap-4">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">
+                                    Data Transaksi
+                                </h2>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Lengkapi barang dan data pelanggan
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setIsTransactionModalOpen(false)
+                                }
+                                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800"
+                                aria-label="Tutup data transaksi"
+                            >
+                                <XMarkIcon className="h-5 w-5" />
+                            </button>
+                        </div>
 
                             {/* Selected Barang Summary */}
                             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
@@ -461,9 +500,8 @@ export default function TransaksiCreate({ barangs }) {
                                         : "Proses Transaksi"}
                                 </button>
                             </form>
-                        </div>
                     </div>
-                </div>
+                </Modal>
             </div>
         </PelayanLayout>
     );

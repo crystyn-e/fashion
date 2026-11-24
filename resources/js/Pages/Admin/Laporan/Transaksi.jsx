@@ -19,9 +19,14 @@ export default function LaporanTransaksi({ transaksis = [], filters = {} }) {
         );
     };
 
-    const exportExcel = () => {
+    const exportPdf = () => {
+        const params = new URLSearchParams({
+            start_date: startDate,
+            end_date: endDate,
+            status,
+        });
         window.open(
-            `/laporan/export-transaksi?start_date=${startDate}&end_date=${endDate}&status=${status}`,
+            `/admin/laporan/transaksi/export-pdf?${params.toString()}`,
             "_blank",
         );
     };
@@ -33,18 +38,7 @@ export default function LaporanTransaksi({ transaksis = [], filters = {} }) {
         router.get("/admin/laporan/transaksi", {}, { preserveState: true });
     };
 
-    // Filter data manual
-    let filtered = [];
-    for (let i = 0; i < transaksis.length; i++) {
-        let t = transaksis[i];
-        let match = true;
-
-        if (startDate && t.tgl_sewa < startDate) match = false;
-        if (endDate && t.tgl_sewa > endDate) match = false;
-        if (status && t.status !== status) match = false;
-
-        if (match) filtered.push(t);
-    }
+    const filtered = transaksis;
 
     // Fungsi format Rupiah
     const formatRupiah = (nilai) => {
@@ -78,7 +72,7 @@ export default function LaporanTransaksi({ transaksis = [], filters = {} }) {
                     ← Kembali
                 </Link>
 
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-800">
                             Laporan Transaksi
@@ -87,12 +81,14 @@ export default function LaporanTransaksi({ transaksis = [], filters = {} }) {
                             Filter dan export data transaksi
                         </p>
                     </div>
-                    <button
-                        onClick={exportExcel}
-                        className="bg-[#0A192F] text-white px-4 py-2 rounded-lg hover:bg-[#1E2F4A] transition-all duration-300 flex items-center gap-2 shadow-sm"
-                    >
-                        📥 Export Excel
-                    </button>
+                    <div>
+                        <button
+                            onClick={exportPdf}
+                            className="bg-[#C5A059] text-[#0A192F] px-4 py-2 rounded-lg hover:bg-[#D4AF37] transition-all duration-300 shadow-sm"
+                        >
+                            Export PDF
+                        </button>
+                    </div>
                 </div>
 
                 {/* Filter */}

@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
 import {
     HomeIcon,
@@ -16,6 +16,7 @@ const logoSrc = "/images/logo-boesafashion.jpg";
 
 export default function PelayanLayout({ children, title }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const currentPath = usePage().url.split("?")[0].replace(/\/+$/, "");
 
     const navigation = [
         { name: "Dashboard", href: "/pelayan/dashboard", icon: HomeIcon },
@@ -36,6 +37,21 @@ export default function PelayanLayout({ children, title }) {
             icon: UserGroupIcon,
         },
     ];
+
+    const isActive = (item) => {
+        if (currentPath === item.href) {
+            return true;
+        }
+
+        if (item.href === "/pelayan/transaksi") {
+            return (
+                currentPath.startsWith(`${item.href}/`) &&
+                currentPath !== "/pelayan/transaksi/create"
+            );
+        }
+
+        return currentPath.startsWith(`${item.href}/`);
+    };
 
     return (
         <div className="min-h-screen bg-white">
@@ -62,15 +78,25 @@ export default function PelayanLayout({ children, title }) {
                         <nav className="flex-1 px-2 space-y-1">
                             {navigation.map((item) => {
                                 const Icon = item.icon;
+                                const active = isActive(item);
                                 return (
                                     <Link
                                         key={item.name}
                                         href={item.href}
-                                        className="group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 text-white/70 hover:text-white hover:bg-white/10"
+                                        aria-current={active ? "page" : undefined}
+                                        className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${
+                                            active
+                                                ? "bg-[#C5A059] text-[#0A192F] shadow-md"
+                                                : "text-white/70 hover:text-white hover:bg-white/10"
+                                        }`}
                                     >
                                         <Icon
                                             className="mr-3 h-5 w-5"
-                                            style={{ color: "#C5A059" }}
+                                            style={{
+                                                color: active
+                                                    ? "#0A192F"
+                                                    : "#C5A059",
+                                            }}
                                         />
                                         {item.name}
                                     </Link>
@@ -129,16 +155,26 @@ export default function PelayanLayout({ children, title }) {
                     <nav className="px-4 py-4 space-y-1">
                         {navigation.map((item) => {
                             const Icon = item.icon;
+                            const active = isActive(item);
                             return (
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                    aria-current={active ? "page" : undefined}
+                                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                                        active
+                                            ? "bg-[#C5A059] text-[#0A192F] shadow-md"
+                                            : "text-white/70 hover:text-white hover:bg-white/10"
+                                    }`}
                                     onClick={() => setIsSidebarOpen(false)}
                                 >
                                     <Icon
                                         className="mr-3 h-5 w-5"
-                                        style={{ color: "#C5A059" }}
+                                        style={{
+                                            color: active
+                                                ? "#0A192F"
+                                                : "#C5A059",
+                                        }}
                                     />
                                     {item.name}
                                 </Link>

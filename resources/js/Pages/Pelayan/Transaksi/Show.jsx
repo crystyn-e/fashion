@@ -1,6 +1,5 @@
 import PelayanLayout from "@/Layouts/PelayanLayout";
 import { Link, router } from "@inertiajs/react";
-import { useRef } from "react";
 import {
     ArrowLeftIcon,
     PrinterIcon,
@@ -10,8 +9,6 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function TransaksiShow({ transaksi, auth }) {
-    const printRef = useRef();
-
     const formatDate = (date) => {
         if (!date) return "-";
         return new Date(date).toLocaleDateString("id-ID", {
@@ -80,13 +77,74 @@ export default function TransaksiShow({ transaksi, auth }) {
     };
 
     const handlePrint = () => {
-        const printContent = printRef.current.innerHTML;
-        const originalContent = document.body.innerHTML;
+        const receipt = document.querySelector(".receipt-print");
+        const receiptStyles = document.getElementById("receipt-print-styles");
 
-        document.body.innerHTML = printContent;
-        window.print();
-        document.body.innerHTML = originalContent;
-        window.location.reload();
+        if (!receipt || !receiptStyles) {
+            window.alert("Konten bon tidak ditemukan.");
+            return;
+        }
+
+        const printFrame = document.createElement("iframe");
+        printFrame.title = "Tampilan cetak bon";
+        printFrame.style.position = "fixed";
+        printFrame.style.width = "0";
+        printFrame.style.height = "0";
+        printFrame.style.border = "0";
+        printFrame.setAttribute("aria-hidden", "true");
+        document.body.appendChild(printFrame);
+
+        const printDocument = printFrame.contentDocument;
+        const printWindow = printFrame.contentWindow;
+
+        if (!printDocument || !printWindow) {
+            printFrame.remove();
+            window.alert("Tampilan cetak bon tidak dapat dibuka.");
+            return;
+        }
+
+        printWindow.onafterprint = () => printFrame.remove();
+        printDocument.open();
+        printDocument.write(
+            '<!DOCTYPE html><html><head><meta charset="utf-8"><title></title></head><body></body></html>',
+        );
+        printDocument.close();
+
+        const style = printDocument.createElement("style");
+        style.textContent = `${receiptStyles.textContent}
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+
+            html,
+            body {
+                width: 297mm;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+        `;
+        printDocument.head.appendChild(style);
+
+        const receiptClone = receipt.cloneNode(true);
+        receiptClone.classList.remove("hidden");
+        printDocument.body.appendChild(receiptClone);
+
+        const startPrint = () => {
+            printWindow.focus();
+            printWindow.print();
+        };
+        const logo = printDocument.querySelector("img");
+
+        if (logo && !logo.complete) {
+            logo.onload = startPrint;
+            logo.onerror = startPrint;
+        } else {
+            printWindow.requestAnimationFrame(() =>
+                printWindow.requestAnimationFrame(startPrint),
+            );
+        }
     };
 
     return (
@@ -368,77 +426,218 @@ export default function TransaksiShow({ transaksi, auth }) {
                     )}
                 </div>
 
+                <style id="receipt-print-styles">{`
+                    .receipt-print {
+                        display: block;
+                        position: relative;
+                        width: 100%;
+                        background: #fff;
+                    }
+
+                    .receipt-print.hidden {
+                        display: none !important;
+                    }
+
+                    .bon-container {
+                        box-sizing: border-box;
+                        display: grid;
+                        grid-template-columns: 1.2fr 1fr 1fr;
+                        grid-template-areas:
+                            "header header header"
+                            "transaction customer rental"
+                            "items items items"
+                            "footer footer payment"
+                            "staff staff payment";
+                        gap: 4mm 6mm;
+                        width: 100%;
+                        max-width: 277mm;
+                        min-height: 190mm;
+                        margin: 10mm auto !important;
+                        padding: 0 !important;
+                        color: #252525;
+                        background: #fff;
+                        font-family: Arial, sans-serif;
+                        font-size: 9pt;
+                        line-height: 1.35;
+                    }
+
+                    .bon-container > div {
+                        min-width: 0;
+                        margin: 0 !important;
+                        padding: 3mm !important;
+                        border: 1px solid #d5c5c0 !important;
+                        text-align: left !important;
+                    }
+
+                    .receipt-header {
+                        grid-area: header;
+                        display: flex !important;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        gap: 8mm;
+                        border: 0 !important;
+                        border-bottom: 2px solid #8b3d32 !important;
+                        padding: 0 0 4mm !important;
+                    }
+
+                    .receipt-brand {
+                        display: flex;
+                        align-items: center;
+                        gap: 4mm;
+                    }
+
+                    .receipt-brand img {
+                        width: 22mm;
+                        height: 18mm;
+                        object-fit: contain;
+                    }
+
+                    .receipt-document {
+                        text-align: right !important;
+                    }
+
+                    .receipt-transaction {
+                        grid-area: transaction;
+                    }
+
+                    .receipt-customer {
+                        grid-area: customer;
+                    }
+
+                    .receipt-rental {
+                        grid-area: rental;
+                    }
+
+                    .receipt-items {
+                        grid-area: items;
+                        padding: 0 !important;
+                        border: 0 !important;
+                    }
+
+                    .receipt-items table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+
+                    .receipt-items th,
+                    .receipt-items td {
+                        border: 1px solid #8b3d32 !important;
+                        padding: 2mm 3mm !important;
+                    }
+
+                    .receipt-items th {
+                        color: #6f3028;
+                        background: #f8f2f0 !important;
+                        text-align: left !important;
+                    }
+
+                    .receipt-items .receipt-number,
+                    .receipt-items .receipt-price,
+                    .receipt-items .receipt-amount {
+                        text-align: right !important;
+                    }
+
+                    .receipt-payment {
+                        grid-area: payment;
+                        align-self: stretch;
+                    }
+
+                    .receipt-footer {
+                        grid-area: footer;
+                        border: 0 !important;
+                        border-top: 1px solid #8b3d32 !important;
+                        padding: 3mm 0 0 !important;
+                    }
+
+                    .receipt-staff {
+                        grid-area: staff;
+                        align-self: end;
+                        border: 0 !important;
+                        padding: 0 !important;
+                        text-align: center !important;
+                    }
+                `}</style>
+
                 {/* ========== BON SEWA BOESA FASHION (Untuk Print) ========== */}
-                <div ref={printRef} className="hidden">
+                <div className="hidden receipt-print">
                     <div
                         className="bon-container"
                         style={{
-                            width: "80mm",
+                            width: "100%",
                             margin: "0 auto",
-                            padding: "8px",
-                            fontFamily:
-                                "'Courier New', 'Lucida Console', monospace",
-                            fontSize: "11px",
-                            lineHeight: "1.3",
+                            padding: "0",
+                            fontFamily: "Arial, sans-serif",
+                            fontSize: "12px",
+                            lineHeight: "1.35",
                             color: "#000",
                             backgroundColor: "#fff",
                         }}
                     >
                         {/* Header Bon */}
                         <div
-                            className="text-center"
+                            className="receipt-header"
                             style={{
-                                borderBottom: "2px dashed #000",
-                                paddingBottom: "8px",
-                                marginBottom: "8px",
+                                borderBottom: "2px solid #8b3d32",
+                                paddingBottom: "12px",
                             }}
                         >
-                            <h2
-                                style={{
-                                    fontSize: "16px",
-                                    fontWeight: "bold",
-                                    margin: "0 0 4px 0",
-                                }}
-                            >
-                                BOESA FASHION
-                            </h2>
-                            <p style={{ fontSize: "9px", margin: "2px 0" }}>
-                                Jl. Jend. D.I Panjaitan No.39, Babura
-                            </p>
-                            <p style={{ fontSize: "9px", margin: "2px 0" }}>
-                                Kec. Medan Baru, Kota Medan
-                            </p>
-                            <p style={{ fontSize: "9px", margin: "2px 0" }}>
-                                Sumatera Utara 20152
-                            </p>
-                            <p style={{ fontSize: "9px", margin: "2px 0" }}>
-                                Telp: +62 822-7650-4245
-                            </p>
-                            <div
-                                style={{
-                                    borderTop: "1px dashed #000",
-                                    marginTop: "6px",
-                                    paddingTop: "4px",
-                                }}
-                            >
+                            <div className="receipt-brand">
+                                <img
+                                    src="/images/logo-boesafashion.jpg"
+                                    alt="Logo Boesa Fashion"
+                                    style={{
+                                        width: "22mm",
+                                        height: "18mm",
+                                        objectFit: "contain",
+                                    }}
+                                />
+                                <div>
+                                    <h2
+                                        style={{
+                                            fontSize: "22px",
+                                            fontWeight: "bold",
+                                            margin: "0 0 4px",
+                                            color: "#8b3d32",
+                                        }}
+                                    >
+                                        BOESA FASHION
+                                    </h2>
+                                    <p style={{ margin: "2px 0" }}>
+                                        Foto Studio / Penyewaan Busana
+                                    </p>
+                                    <p style={{ margin: "2px 0" }}>
+                                        Jalan DI. Panjaitan No. 39 Medan
+                                    </p>
+                                    <p style={{ margin: "2px 0" }}>
+                                        Telp: +62 822-7650-4245
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="receipt-document">
                                 <p
                                     style={{
-                                        fontSize: "11px",
+                                        fontSize: "18px",
                                         fontWeight: "bold",
-                                        margin: "0",
+                                        margin: "0 0 6px",
+                                        color: "#8b3d32",
                                     }}
                                 >
                                     BUKTI SEWA
+                                </p>
+                                <p style={{ margin: "3px 0" }}>
+                                    Medan, {formatDate(new Date())}
+                                </p>
+                                <p style={{ margin: "3px 0" }}>
+                                    Kepada Yth. {transaksi.pelanggan.nama}
                                 </p>
                             </div>
                         </div>
 
                         {/* Info Transaksi */}
                         <div
+                            className="receipt-transaction"
                             style={{
                                 marginBottom: "8px",
-                                borderBottom: "1px dotted #000",
-                                paddingBottom: "6px",
                             }}
                         >
                             <div
@@ -483,10 +682,9 @@ export default function TransaksiShow({ transaksi, auth }) {
 
                         {/* Data Pelanggan */}
                         <div
+                            className="receipt-customer"
                             style={{
                                 marginBottom: "8px",
-                                borderBottom: "1px dotted #000",
-                                paddingBottom: "6px",
                             }}
                         >
                             <p
@@ -511,10 +709,9 @@ export default function TransaksiShow({ transaksi, auth }) {
 
                         {/* Info Sewa */}
                         <div
+                            className="receipt-rental"
                             style={{
                                 marginBottom: "8px",
-                                borderBottom: "1px dotted #000",
-                                paddingBottom: "6px",
                             }}
                         >
                             <p
@@ -542,10 +739,9 @@ export default function TransaksiShow({ transaksi, auth }) {
 
                         {/* Detail Barang */}
                         <div
+                            className="receipt-items"
                             style={{
                                 marginBottom: "8px",
-                                borderBottom: "1px dotted #000",
-                                paddingBottom: "6px",
                             }}
                         >
                             <p
@@ -568,21 +764,21 @@ export default function TransaksiShow({ transaksi, auth }) {
                                             borderBottom: "1px dotted #000",
                                         }}
                                     >
+                                        <th>Banyaknya</th>
+                                        <th>Nama Barang</th>
                                         <th
                                             style={{
-                                                textAlign: "left",
-                                                padding: "2px 0",
+                                                textAlign: "right",
                                             }}
                                         >
-                                            Item
+                                            Harga
                                         </th>
                                         <th
                                             style={{
                                                 textAlign: "right",
-                                                padding: "2px 0",
                                             }}
                                         >
-                                            Harga
+                                            Jumlah
                                         </th>
                                     </tr>
                                 </thead>
@@ -590,17 +786,19 @@ export default function TransaksiShow({ transaksi, auth }) {
                                     {transaksi.detail_transaksis.map(
                                         (detail, idx) => (
                                             <tr key={idx}>
-                                                <td
-                                                    style={{ padding: "2px 0" }}
-                                                >
+                                                <td className="receipt-number">
+                                                    1
+                                                </td>
+                                                <td>
                                                     {detail.barang.nama_barang}
                                                 </td>
-                                                <td
-                                                    style={{
-                                                        textAlign: "right",
-                                                        padding: "2px 0",
-                                                    }}
-                                                >
+                                                <td className="receipt-price">
+                                                    Rp{" "}
+                                                    {formatRupiah(
+                                                        detail.harga_sewa,
+                                                    )}
+                                                </td>
+                                                <td className="receipt-amount">
                                                     Rp{" "}
                                                     {formatRupiah(
                                                         detail.harga_sewa,
@@ -615,10 +813,9 @@ export default function TransaksiShow({ transaksi, auth }) {
 
                         {/* Pembayaran */}
                         <div
+                            className="receipt-payment"
                             style={{
                                 marginBottom: "8px",
-                                borderBottom: "1px dotted #000",
-                                paddingBottom: "6px",
                             }}
                         >
                             <p
@@ -683,10 +880,9 @@ export default function TransaksiShow({ transaksi, auth }) {
 
                         {/* DILAYANI OLEH */}
                         <div
+                            className="receipt-staff"
                             style={{
                                 marginBottom: "8px",
-                                borderBottom: "1px dotted #000",
-                                paddingBottom: "6px",
                             }}
                         >
                             <p
@@ -703,7 +899,7 @@ export default function TransaksiShow({ transaksi, auth }) {
 
                         {/* Footer */}
                         <div
-                            className="text-center"
+                            className="receipt-footer"
                             style={{ marginTop: "8px", paddingTop: "6px" }}
                         >
                             <p style={{ fontSize: "9px", margin: "2px 0" }}>
