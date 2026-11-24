@@ -53,6 +53,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/laporan/transaksi', [AdminLaporanController::class, 'transaksi'])->name('laporan.transaksi');
     Route::get('/laporan/transaksi/export-pdf', [AdminLaporanController::class, 'exportTransaksiPdf'])->name('laporan.transaksi.export-pdf');
     Route::get('/laporan/barang', [AdminLaporanController::class, 'barang'])->name('laporan.barang');
+    Route::get('/laporan/barang/export-pdf', [AdminLaporanController::class, 'exportBarangPdf'])->name('laporan.barang.export-pdf');
 
     // ========== MANAJEMEN PESAN KONTAK (MENGGUNAKAN AdminContactController) ==========
     Route::get('/contacts/unread-count', [AdminContactController::class, 'unreadCount'])->name('contacts.unread');
@@ -95,7 +96,6 @@ Route::middleware(['auth', 'role:staf'])->prefix('pelayan')->name('pelayan.')->g
 Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
 Route::get('/laporan/transaksi', [AdminLaporanController::class, 'transaksi'])->name('laporan.transaksi');
 Route::get('/laporan/barang', [AdminLaporanController::class, 'barang'])->name('laporan.barang');
-Route::get('/laporan/export-barang', [AdminLaporanController::class, 'exportBarang'])->name('laporan.export-barang');
 
 // =========== ROUTE KONTAK (KIRIM PESAN DARI HALAMAN KONTAK) ===========
 Route::post('/contact/send', [ContactController::class, 'send'])->name('contact.send');

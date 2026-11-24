@@ -51,8 +51,12 @@ export default function LaporanBarang({ barangs = [] }) {
         if (filtered[i].status === "disewa") totalDisewa++;
     }
 
-    const exportExcel = () => {
-        window.open("/laporan/export-barang", "_blank");
+    const exportPdf = () => {
+        const params = new URLSearchParams({ search, kategori, status });
+        window.open(
+            `/admin/laporan/barang/export-pdf?${params.toString()}`,
+            "_blank",
+        );
     };
 
     const resetFilters = () => {
@@ -109,10 +113,10 @@ export default function LaporanBarang({ barangs = [] }) {
                         </p>
                     </div>
                     <button
-                        onClick={exportExcel}
-                        className="bg-[#0A192F] text-white px-4 py-2 rounded-lg hover:bg-[#1E2F4A] transition-all duration-300 flex items-center gap-2 shadow-sm"
+                        onClick={exportPdf}
+                        className="rounded-lg bg-[#C5A059] px-4 py-2 text-[#0A192F] shadow-sm transition-all duration-300 hover:bg-[#D4AF37]"
                     >
-                        📥 Export Excel
+                        Export PDF
                     </button>
                 </div>
 

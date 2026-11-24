@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\Barang;
-use App\Exports\BarangExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -83,7 +81,7 @@ class LaporanController extends Controller
         ]);
     }
 
-    private function nextTransactionReportDocumentNumber(): string
+    private function nextReportDocumentNumber(): string
     {
         return DB::transaction(function () {
             $sequence = DB::table('pdf_document_sequences')
@@ -106,6 +104,36 @@ class LaporanController extends Controller
 
             return 'BSH-' . str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
         });
+    }
+
+    private function reportLogoDataUrl(): string
+    {
+        $logoPath = public_path('images/logo-boesafashion.jpg');
+        if (!is_file($logoPath)) {
+            throw new \RuntimeException('Logo laporan tidak ditemukan.');
+        }
+
+        return 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath));
+    }
+
+    private function addPdfPageNumbers($pdf): void
+    {
+        $pdf->render();
+        $dompdf = $pdf->getDomPDF();
+        $canvas = $dompdf->getCanvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('DejaVu Sans', 'normal');
+        $pageText = 'Halaman {PAGE_NUM} dari {PAGE_COUNT}';
+        $pageTextWidth = $fontMetrics->getTextWidth($pageText, $font, 8);
+
+        $canvas->page_text(
+            $canvas->get_width() - 32 - $pageTextWidth,
+            $canvas->get_height() - 18,
+            $pageText,
+            $font,
+            8,
+            [90, 90, 90]
+        );
     }
 
     public function exportTransaksiPdf(Request $request)
@@ -154,14 +182,9 @@ class LaporanController extends Controller
                 ];
             });
 
-        $logoPath = public_path('images/logo-boesafashion.jpg');
-        if (!is_file($logoPath)) {
-            throw new \RuntimeException('Logo laporan tidak ditemukan.');
-        }
-
         $printedAt = now()->format('d/m/Y H:i:s');
         $printedDate = now()->locale('id')->translatedFormat('d F Y');
-        $documentNumber = $this->nextTransactionReportDocumentNumber();
+        $documentNumber = $this->nextReportDocumentNumber();
         $startDateLabel = $startDate
             ? Carbon::parse($startDate)->format('d/m/Y')
             : ($transaksiRecords->last()?->created_at?->format('d/m/Y') ?? '-');
@@ -176,24 +199,10 @@ class LaporanController extends Controller
             'printedAt' => $printedAt,
             'printedDate' => $printedDate,
             'documentNumber' => $documentNumber,
-            'logo' => 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath)),
+            'logo' => $this->reportLogoDataUrl(),
         ])->setPaper('a4');
 
-        $pdf->render();
-        $dompdf = $pdf->getDomPDF();
-        $canvas = $dompdf->getCanvas();
-        $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('DejaVu Sans', 'normal');
-        $pageText = 'Halaman {PAGE_NUM} dari {PAGE_COUNT}';
-        $pageTextWidth = $fontMetrics->getTextWidth($pageText, $font, 8);
-        $canvas->page_text(
-            $canvas->get_width() - 32 - $pageTextWidth,
-            $canvas->get_height() - 18,
-            $pageText,
-            $font,
-            8,
-            [90, 90, 90]
-        );
+        $this->addPdfPageNumbers($pdf);
 
         return $pdf->download(
             'laporan-transaksi-' . ($startDate ?? 'semua') . '-' . ($endDate ?? 'tanggal') . '.pdf'
@@ -227,8 +236,68 @@ class LaporanController extends Controller
         ]);
     }
 
-    public function exportBarang()
+    public function exportBarangPdf(Request $request)
     {
-        return Excel::download(new BarangExport, 'laporan-barang.xlsx');
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'kategori' => 'nullable|string|max:100',
+            'status' => 'nullable|in:tersedia,disewa,maintenance',
+        ]);
+
+        $query = Barang::with('kategori')->withCount('detailTransaksis');
+
+        if (!empty($validated['search'])) {
+            $query->where('nama_barang', 'LIKE', '%' . $validated['search'] . '%');
+        }
+
+        if (!empty($validated['kategori'])) {
+            if ($validated['kategori'] === '-') {
+                $query->whereDoesntHave('kategori');
+            } else {
+                $query->whereHas('kategori', function ($kategoriQuery) use ($validated) {
+                    $kategoriQuery->where('nama_kategori', $validated['kategori']);
+                });
+            }
+        }
+
+        if (!empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        $barangs = $query->orderBy('total_disewa', 'desc')
+            ->get()
+            ->map(function ($barang) {
+                $hargaSewa = (float) $barang->harga_sewa;
+                $totalDisewa = (int) $barang->detail_transaksis_count;
+
+                return [
+                    'kode_barang' => $barang->kode_barang,
+                    'nama_barang' => $barang->nama_barang,
+                    'kategori' => $barang->kategori?->nama_kategori ?? '-',
+                    'ukuran' => $barang->ukuran ?? '-',
+                    'warna' => $barang->warna ?? '-',
+                    'harga_sewa' => $hargaSewa,
+                    'stok' => (int) $barang->stok,
+                    'total_disewa' => $totalDisewa,
+                    'total_pendapatan' => $totalDisewa * $hargaSewa,
+                    'status' => $barang->status,
+                ];
+            });
+
+        $printedAt = now()->format('d/m/Y H:i:s');
+        $printedDate = now()->locale('id')->translatedFormat('d F Y');
+        $pdf = Pdf::loadView('pdf.laporan-barang', [
+            'barangs' => $barangs,
+            'totalPendapatan' => $barangs->sum('total_pendapatan'),
+            'printedAt' => $printedAt,
+            'printedDate' => $printedDate,
+            'documentNumber' => $this->nextReportDocumentNumber(),
+            'logo' => $this->reportLogoDataUrl(),
+        ])->setPaper('a4', 'landscape');
+
+        $this->addPdfPageNumbers($pdf);
+
+        return $pdf->download('laporan-barang-' . now()->format('Ymd-His') . '.pdf');
     }
+
 }

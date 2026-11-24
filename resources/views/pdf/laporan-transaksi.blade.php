@@ -62,7 +62,7 @@
             background: #0a192f;
             color: #fff;
             font-size: 8px;
-            text-align: left;
+            text-align: center;
         }
 
         .report tbody tr:nth-child(even) {
