@@ -7,7 +7,7 @@ export default function KoleksiShow({ barang, barangTerkait }) {
     const openWhatsApp = () => {
         const message = `Halo Boesa Fashion, saya tertarik dengan ${barang.nama_barang}. Apakah masih tersedia?`;
         window.open(
-            `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`,
+            `https://wa.me/628116192200?text=${encodeURIComponent(message)}`,
             "_blank",
         );
     };

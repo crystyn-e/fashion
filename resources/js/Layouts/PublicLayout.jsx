@@ -9,6 +9,14 @@ export default function PublicLayout({ children }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
+    const openWhatsApp = () => {
+        const message = `Halo Boesa Fashion, saya tertarik dengan ${barang.nama_barang}. Apakah masih tersedia?`;
+        window.open(
+            `https://wa.me/628116192200?text=${encodeURIComponent(message)}`,
+            "_blank",
+        );
+    };
+
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
@@ -163,6 +171,7 @@ export default function PublicLayout({ children }) {
                             </a>
                             <a
                                 href="#"
+                                onClick={openWhatsApp}
                                 className="text-gray-400 hover:text-[#C5A059] transition-colors"
                             >
                                 WhatsApp
